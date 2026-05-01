@@ -1085,11 +1085,11 @@ function generateBudgetIcon(){
 
 // ── INIT ──────────────────────────────────────────
 load();
-// Set today's date as default
 document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
 document.getElementById('header-period').textContent = state.period;
 renderWeekly();
 renderMonthly();
+setTimeout(() => loadFromKV(), 500);
 try{const icon=generateBudgetIcon();document.getElementById('appleIcon').href=icon;}catch(e){}
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
