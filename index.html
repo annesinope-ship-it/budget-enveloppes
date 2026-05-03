@@ -119,6 +119,17 @@
   .danger-desc { font-size: 12px; color: var(--red); margin-bottom: 12px; opacity: 0.8; }
   .btn-danger { background: var(--red); color: white; border: none; border-radius: 8px; padding: 11px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
 
+  /* REMINDER BANNER */
+  .reminder-banner { display:none; position:fixed; bottom:0; left:0; right:0; z-index:500; background:linear-gradient(135deg,#2D6A4F,#1D9E75); color:white; padding:16px 20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); max-width:480px; margin:0 auto; border-radius:16px 16px 0 0; }
+  .reminder-banner.show { display:block; animation: slideUp 0.4s ease; }
+  @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+  .reminder-title { font-family:'DM Serif Display',serif; font-size:18px; margin-bottom:6px; }
+  .reminder-amount { font-size:32px; font-weight:700; margin:8px 0; }
+  .reminder-sub { font-size:13px; opacity:0.85; margin-bottom:14px; }
+  .reminder-btns { display:flex; gap:10px; }
+  .reminder-btn-primary { background:white; color:#2D6A4F; border:none; border-radius:10px; padding:11px 18px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; flex:1; }
+  .reminder-btn-dismiss { background:rgba(255,255,255,0.2); color:white; border:none; border-radius:10px; padding:11px 18px; font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; }
+
   /* HISTORY & ANALYSIS */
   .hist-month { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:12px; overflow:hidden; }
   .hist-header { padding:14px 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
@@ -334,6 +345,17 @@
 
   </div>
 
+</div>
+
+<!-- REMINDER BANNER -->
+<div class="reminder-banner" id="reminder-banner">
+  <div class="reminder-title" id="reminder-title">💰 Rappel épargne</div>
+  <div class="reminder-amount" id="reminder-amount">0,00 €</div>
+  <div class="reminder-sub" id="reminder-sub">non dépensés</div>
+  <div class="reminder-btns">
+    <button class="reminder-btn-primary" onclick="dismissReminder(true)">✅ Noté, je vire !</button>
+    <button class="reminder-btn-dismiss" onclick="dismissReminder(false)">Plus tard</button>
+  </div>
 </div>
 
 <!-- EDIT MODAL -->
@@ -1062,6 +1084,82 @@ document.addEventListener('keydown', e => {
   else if (document.activeElement.id === 'exp-amount') addExpense();
 });
 
+// ── REMINDER ──────────────────────────────────────
+function checkReminder() {
+  const now = new Date();
+  const hour = now.getHours();
+  const min = now.getMinutes();
+  const day = now.getDay(); // 0=dimanche
+  const date = now.getDate();
+  const monthKey = now.getFullYear() + '-' + (now.getMonth()+1);
+  // Clé semaine basée sur le vrai lundi de la semaine
+  const monday = new Date(now);
+  monday.setDate(date - (day === 0 ? 6 : day - 1)); // lundi de cette semaine
+  const weekKey = monday.getFullYear() + '-' + (monday.getMonth()+1) + '-' + monday.getDate();
+
+  // Seulement à partir de 19h30
+  if (hour < 19 || (hour === 19 && min < 30)) return;
+
+  // Vérifier si déjà vu aujourd'hui
+  const lastDismissWeek = localStorage.getItem('reminder_week');
+  const lastDismissMonth = localStorage.getItem('reminder_month');
+
+  let showReminder = false;
+  let type = '';
+
+  // Fin de mois = le 27 (jour du salaire)
+  if (date === 27 && lastDismissMonth !== monthKey) {
+    type = 'month';
+    showReminder = true;
+  }
+  // Dimanche = fin de semaine
+  else if (day === 0 && lastDismissWeek !== weekKey) {
+    type = 'week';
+    showReminder = true;
+  }
+
+  if (!showReminder) return;
+
+  // Calcul du reste
+  const banner = document.getElementById('reminder-banner');
+  const titleEl = document.getElementById('reminder-title');
+  const amountEl = document.getElementById('reminder-amount');
+  const subEl = document.getElementById('reminder-sub');
+
+  if (type === 'month') {
+    const spent = state.expenses.flat().reduce((s,e)=>s+e.amount,0);
+    const rem = state.monthlyBudget - spent;
+    if (rem <= 0) return;
+    titleEl.textContent = '🎉 Fin de mois !';
+    amountEl.textContent = fmt(rem);
+    subEl.textContent = 'non dépensés ce mois — virez-les en épargne !';
+    banner.dataset.type = 'month';
+    banner.dataset.key = monthKey;
+  } else {
+    const wi = state.currentWeek;
+    const w = state.weeks[wi];
+    const spent = state.expenses[wi].reduce((s,e)=>s+e.amount,0);
+    const rem = w.budget - spent;
+    if (rem <= 0) return;
+    titleEl.textContent = '💰 Fin de semaine !';
+    amountEl.textContent = fmt(rem);
+    subEl.textContent = `non dépensés cette semaine — pensez à épargner !`;
+    banner.dataset.type = 'week';
+    banner.dataset.key = weekKey;
+  }
+
+  banner.classList.add('show');
+}
+
+function dismissReminder(confirmed) {
+  const banner = document.getElementById('reminder-banner');
+  const type = banner.dataset.type;
+  const key = banner.dataset.key;
+  if (type === 'month') localStorage.setItem('reminder_month', key);
+  else localStorage.setItem('reminder_week', key);
+  banner.classList.remove('show');
+}
+
 // ── PWA ICON ──────────────────────────────────────
 function generateBudgetIcon(){
   const c=document.createElement('canvas');c.width=192;c.height=192;
@@ -1090,6 +1188,10 @@ document.getElementById('header-period').textContent = state.period;
 renderWeekly();
 renderMonthly();
 setTimeout(() => loadFromKV(), 500);
+// Vérifier rappel épargne
+setTimeout(() => checkReminder(), 1000);
+// Revérifier toutes les heures (au cas où l'app reste ouverte)
+setInterval(() => checkReminder(), 60 * 60 * 1000);
 try{const icon=generateBudgetIcon();document.getElementById('appleIcon').href=icon;}catch(e){}
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
