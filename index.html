@@ -371,10 +371,13 @@
     <!-- Objectifs -->
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">🎯 Mes objectifs</div>
     <div id="sav-goals"></div>
-    <div class="goal-add-row" style="margin:8px 0 16px;">
+    <div class="goal-add-row" style="margin:8px 0 6px;">
       <input type="text" id="sav-goal-name" placeholder="Nom" style="flex:1;" />
       <input type="number" id="sav-goal-target" placeholder="Cible €" style="width:80px;" />
       <input type="number" id="sav-goal-saved" placeholder="Déjà €" style="width:80px;" />
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      <select id="sav-goal-account" style="flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;"></select>
       <button onclick="addSavingsGoal()" style="background:var(--text);color:white;border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">+</button>
     </div>
 
@@ -568,8 +571,12 @@
       <input type="number" id="goal-edit-current" min="0" step="100" />
     </div>
     <div class="edit-field">
-      <label>Échéance</label>
+      <label>Échéance (optionnel)</label>
       <input type="month" id="goal-edit-deadline" />
+    </div>
+    <div class="edit-field">
+      <label>Compte source</label>
+      <select id="goal-edit-account"></select>
     </div>
     <div class="edit-btns">
       <button class="edit-cancel" onclick="closeGoalModal()">Annuler</button>
@@ -651,8 +658,8 @@ let state = {
     { name: 'Casden', balance: 100, autoMonthly: 100 }
   ],
   savingsGoals: [
-    { name: 'Apport immo', target: 30000, saved: 10504 },
-    { name: 'Impôts sept', target: 800, saved: 300 }
+    { name: 'Apport immo', target: 30000, saved: 10504, account: 'PEL' },
+    { name: 'Impôts sept', target: 800, saved: 300, account: 'Livret A' }
   ],
   chargesFixes: [
     { label: 'Loyer', amount: 963.29 },
@@ -1146,9 +1153,17 @@ function renderSavings() {
         '<span>' + pct + '%</span>' +
       '</div>' +
       '<div class="sav-obj-bar"><div class="sav-obj-bar-fill" style="width:' + pct + '%;background:' + barColor + ';"></div></div>' +
+      (g.account ? '<div style="font-size:11px;color:var(--text3);margin-bottom:4px;">📍 sur ' + g.account + '</div>' : '') +
       (remaining > 0 ? '<div class="sav-obj-remaining">Il manque ' + fmt(remaining) + '</div>' : '<div class="sav-obj-remaining" style="color:#2D6A4F;">✅ Objectif atteint !</div>') +
     '</div>';
   }).join('') || '<div style="color:var(--text3);font-size:13px;padding:8px;">Aucun objectif</div>';
+
+  // Populate account selector for new goals
+  const goalAcctSel = document.getElementById('sav-goal-account');
+  if (goalAcctSel) {
+    goalAcctSel.innerHTML = '<option value="">— Compte source —</option>' +
+      accounts.map(a => '<option value="' + a.name + '">' + a.name + ' (' + fmt(a.balance) + ')</option>').join('');
+  }
 
   // Summary
   const totalGoals = goals.reduce((s,g) => s + g.target, 0);
@@ -1204,8 +1219,9 @@ function addSavingsGoal() {
   const name = document.getElementById('sav-goal-name').value.trim();
   const target = parseFloat(document.getElementById('sav-goal-target').value) || 0;
   const saved = parseFloat(document.getElementById('sav-goal-saved').value) || 0;
+  const account = document.getElementById('sav-goal-account').value || '';
   if (!name || target <= 0) return;
-  state.savingsGoals.push({ name, target, saved });
+  state.savingsGoals.push({ name, target, saved, account });
   document.getElementById('sav-goal-name').value = '';
   document.getElementById('sav-goal-target').value = '';
   document.getElementById('sav-goal-saved').value = '';
@@ -1334,7 +1350,13 @@ function editGoal(i) {
   document.getElementById('goal-edit-name').value = g.name;
   document.getElementById('goal-edit-target').value = g.target;
   document.getElementById('goal-edit-current').value = g.saved || 0;
-  document.getElementById('goal-edit-deadline').value = g.deadline;
+  document.getElementById('goal-edit-deadline').value = g.deadline || '';
+  // Populate account selector
+  const sel = document.getElementById('goal-edit-account');
+  sel.innerHTML = '<option value="">— Aucun compte —</option>' +
+    (state.savingsAccounts||[]).map(a =>
+      '<option value="' + a.name + '"' + (g.account === a.name ? ' selected' : '') + '>' + a.name + ' (' + fmt(a.balance) + ')</option>'
+    ).join('');
   document.getElementById('goal-edit-modal').classList.add('open');
 }
 
@@ -1350,7 +1372,8 @@ function saveGoalEdit() {
   g.name = document.getElementById('goal-edit-name').value.trim() || g.name;
   g.target = parseFloat(document.getElementById('goal-edit-target').value) || g.target;
   g.saved = parseFloat(document.getElementById('goal-edit-current').value) || 0;
-  g.deadline = document.getElementById('goal-edit-deadline').value || g.deadline;
+  g.deadline = document.getElementById('goal-edit-deadline').value || '';
+  g.account = document.getElementById('goal-edit-account').value || '';
   closeGoalModal();
   save();
   renderGenerator();
@@ -1667,7 +1690,7 @@ function renderBilan() {
       const pct = g.target > 0 ? Math.min(100, Math.round((saved / g.target) * 100)) : 0;
       const remaining = g.target - saved;
       return '<div class="goal-card">' +
-        '<div class="goal-header"><span class="goal-name">' + g.name + '</span></div>' +
+        '<div class="goal-header"><span class="goal-name">' + g.name + (g.account ? ' <span style="font-size:11px;color:var(--text3);font-weight:400;">(' + g.account + ')</span>' : '') + '</span></div>' +
         '<div class="goal-amounts"><span>' + fmt(saved) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
         '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
         (remaining > 0 ? '<div class="goal-remaining">Il manque ' + fmt(remaining) + '</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
