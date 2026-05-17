@@ -332,6 +332,28 @@
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">🤖 Assistant budget</div>
 
     <div class="gen-card">
+      <div class="gen-title">📅 Période du mois</div>
+      <div style="display:flex;gap:8px;">
+        <div class="gen-field" style="flex:1;">
+          <label>Du</label>
+          <input type="date" id="gen-date-start" />
+        </div>
+        <div class="gen-field" style="flex:1;">
+          <label>Au</label>
+          <input type="date" id="gen-date-end" />
+        </div>
+      </div>
+      <div class="gen-field">
+        <label>Nombre de semaines</label>
+        <select id="gen-nb-weeks" onchange="updateWeekFields()">
+          <option value="4">4 semaines</option>
+          <option value="5">5 semaines</option>
+        </select>
+      </div>
+      <div id="gen-week-dates"></div>
+    </div>
+
+    <div class="gen-card">
       <div class="gen-title">Revenus du mois</div>
       <div class="gen-field">
         <label>Salaire net</label>
@@ -1025,6 +1047,45 @@ function addExpense() {
 }
 
 // ── GENERATOR ─────────────────────────────────────
+function updateWeekFields() {
+  const start = document.getElementById('gen-date-start').value;
+  const end = document.getElementById('gen-date-end').value;
+  const nb = parseInt(document.getElementById('gen-nb-weeks').value) || 4;
+  const container = document.getElementById('gen-week-dates');
+
+  if (!start || !end) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const startD = new Date(start);
+  const endD = new Date(end);
+  const totalDays = Math.round((endD - startD) / (1000*60*60*24));
+  const daysPerWeek = Math.floor(totalDays / nb);
+
+  let html = '<div style="margin-top:10px;">';
+  for (let i = 0; i < nb; i++) {
+    const wStart = new Date(startD);
+    wStart.setDate(wStart.getDate() + i * daysPerWeek);
+    const wEnd = new Date(startD);
+    wEnd.setDate(wStart.getDate() + daysPerWeek - (i < nb - 1 ? 1 : 0));
+    if (i === nb - 1) wEnd.setTime(endD.getTime());
+
+    const fmtD = d => d.getDate() + '/' + (d.getMonth()+1);
+    const months = ['jan','fév','mar','avr','mai','juin','juil','août','sept','oct','nov','déc'];
+    const shortStart = wStart.getDate() + ' ' + months[wStart.getMonth()];
+    const shortEnd = wEnd.getDate() + ' ' + months[wEnd.getMonth()];
+    const defaultName = 'S' + (i+1) + ' — ' + shortStart + '→' + shortEnd;
+
+    html += '<div class="gen-charge-row" style="padding:6px 0;">' +
+      '<span style="font-size:12px;color:var(--text3);min-width:20px;">S' + (i+1) + '</span>' +
+      '<input type="text" id="gen-wname-' + i + '" value="' + defaultName + '" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;" />' +
+    '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
 function renderGenerator() {
   // Render charges list
   const list = document.getElementById('gen-charges-list');
@@ -1037,6 +1098,10 @@ function renderGenerator() {
   ).join('');
   updateChargesTotal();
 
+  // Add date listeners
+  document.getElementById('gen-date-start').addEventListener('change', updateWeekFields);
+  document.getElementById('gen-date-end').addEventListener('change', updateWeekFields);
+
   // Render goals
   const goalsList = document.getElementById('gen-goals-list');
   goalsList.innerHTML = (state.savingsGoals||[]).map((g, i) => {
@@ -1046,11 +1111,20 @@ function renderGenerator() {
     const [dy,dm] = g.deadline.split('-').map(Number);
     const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
     const perMonth = remaining > 0 ? Math.ceil(remaining / monthsLeft) : 0;
+    const isRealistic = perMonth <= (state.monthlyBudget * 0.4);
     return '<div class="goal-card">' +
-      '<div class="goal-header"><span class="goal-name">' + g.name + '</span><span class="goal-deadline">' + g.deadline + '</span></div>' +
+      '<div class="goal-header">' +
+        '<span class="goal-name">' + g.name + '</span>' +
+        '<span style="display:flex;gap:6px;align-items:center;">' +
+          '<button onclick="editGoal(' + i + ')" style="background:none;border:none;cursor:pointer;font-size:13px;">✏️</button>' +
+          '<button onclick="removeGoal(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">✕</button>' +
+        '</span>' +
+      '</div>' +
       '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
       '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
-      (perMonth > 0 ? '<div class="goal-remaining">→ ' + fmt(perMonth) + '/mois pendant ' + monthsLeft + ' mois</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
+      (perMonth > 0 ? '<div class="goal-remaining">→ ' + fmt(perMonth) + '/mois pendant ' + monthsLeft + ' mois' +
+        (!isRealistic ? ' <span style="color:#B5292A;font-weight:500;">(⚠️ difficile)</span>' : '') +
+      '</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
     '</div>';
   }).join('') || '<div style="color:var(--text3);font-size:13px;">Aucun objectif</div>';
 }
@@ -1084,6 +1158,25 @@ function addGoal() {
   save();
 }
 
+function editGoal(i) {
+  const g = state.savingsGoals[i];
+  if (!g) return;
+  const name = prompt('Nom de l\'objectif :', g.name);
+  if (name === null) return;
+  const target = prompt('Montant cible (€) :', g.target);
+  if (target === null) return;
+  const current = prompt('Montant déjà épargné (€) :', g.current);
+  if (current === null) return;
+  const deadline = prompt('Échéance (format AAAA-MM) :', g.deadline);
+  if (deadline === null) return;
+  g.name = name;
+  g.target = parseFloat(target) || g.target;
+  g.current = parseFloat(current) || g.current;
+  g.deadline = deadline || g.deadline;
+  save();
+  renderGenerator();
+}
+
 function removeGoal(i) {
   state.savingsGoals.splice(i, 1);
   renderGenerator();
@@ -1097,8 +1190,25 @@ async function generateBudget() {
   const extra = parseFloat(document.getElementById('gen-extra').value) || 0;
   const notes = document.getElementById('gen-notes').value.trim();
   const chargesTotal = (state.chargesFixes||[]).reduce((s,c) => s + (c.amount||0), 0);
+  const dateStart = document.getElementById('gen-date-start').value;
+  const dateEnd = document.getElementById('gen-date-end').value;
+  const nbWeeks = parseInt(document.getElementById('gen-nb-weeks').value) || 4;
 
   if (salary <= 0) { alert('Entrez votre salaire'); return; }
+  if (!dateStart || !dateEnd) { alert('Entrez les dates de la période'); return; }
+
+  // Collect week names
+  const weekNames = [];
+  for (let i = 0; i < nbWeeks; i++) {
+    const el = document.getElementById('gen-wname-' + i);
+    weekNames.push(el ? el.value : 'Semaine ' + (i+1));
+  }
+
+  // Update period
+  const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const ds = new Date(dateStart);
+  const de = new Date(dateEnd);
+  const periodStr = ds.getDate() + ' ' + months[ds.getMonth()] + ' → ' + de.getDate() + ' ' + months[de.getMonth()] + ' ' + de.getFullYear();
 
   // Build context for AI
   const totalRevenu = salary + extra;
@@ -1126,7 +1236,7 @@ async function generateBudget() {
   }).join('; ');
 
   const chargesDetail = (state.chargesFixes||[]).map(c => c.label + ': ' + c.amount.toFixed(2)).join(', ');
-  const weekNames = state.weeks.map(w => w.name).join(', ');
+  const weekNamesForPrompt = weekNames.join(', ');
   const categories = CAT_LIST.join(', ');
 
   const prompt = `Tu es un assistant budget personnel. Génère un budget mensuel.
@@ -1138,7 +1248,7 @@ DISPONIBLE POUR VIVRE: ${dispo.toFixed(2)} EUR
 OBJECTIFS ÉPARGNE: ${goalsSummary || 'aucun'}
 DÉPENSES MOIS PRÉCÉDENT: ${pastSummary || 'pas de données'}
 HISTORIQUE: ${histSummary || 'pas de données'}
-SEMAINES DU MOIS: ${weekNames}
+SEMAINES DU MOIS: ${weekNamesForPrompt}\nPÉRIODE: ${periodStr}\nNOMBRE DE SEMAINES: ${nbWeeks}
 CATÉGORIES: ${categories}
 ${notes ? 'NOTES: ' + notes : ''}
 
@@ -1158,13 +1268,21 @@ Réponds UNIQUEMENT en JSON valide, sans aucun texte avant ou après, avec cette
   ]
 }
 
-Règles:
+Règles STRICTES:
 - monthlyBudget = ce qui reste après charges fixes et épargne conseillée
-- Répartis le budget en 4 semaines réalistes basées sur les habitudes passées
+- Répartis le budget en ${nbWeeks} semaines réalistes basées sur les habitudes passées
 - Utilise UNIQUEMENT ces catégories: ${categories}
-- Le commentaire doit être en français, 2-3 phrases max
-- Si objectifs épargne, calcule combien mettre de côté ce mois
-- Tiens compte des notes de la personne`;
+- Le commentaire doit être en français, 2-3 phrases max, honnête et réaliste
+- Tiens compte des notes de la personne
+
+Règles ÉPARGNE (très important):
+- L'épargne conseillée ne doit JAMAIS dépasser 30% du disponible après charges fixes
+- Si un objectif demande trop par mois, le signaler dans le commentaire et proposer un montant réaliste
+- Prioriser les objectifs par deadline la plus proche
+- Le budget vie courante doit rester vivable : minimum 200€/semaine pour une personne
+- Si les objectifs sont irréalistes (ex: 30 000€ en 2 ans avec un salaire de 2 900€), le dire clairement dans le commentaire et proposer une échéance plus réaliste
+- Ne jamais sacrifier le quotidien pour l'épargne — un budget trop serré n'est pas tenable
+- Si le mois précédent a été dépassé, réduire légèrement les catégories concernées`;
 
   // Show loading
   document.getElementById('gen-loading').classList.add('show');
@@ -1214,14 +1332,30 @@ function applyGeneratedBudget() {
   if (!generatedPlan) return;
   if (!confirm('Appliquer ce budget ? Cela va remplacer le budget et le plan actuels.')) return;
 
+  // Update period
+  const dateStart = document.getElementById('gen-date-start').value;
+  const dateEnd = document.getElementById('gen-date-end').value;
+  if (dateStart && dateEnd) {
+    const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const ds = new Date(dateStart);
+    const de = new Date(dateEnd);
+    state.period = ds.getDate() + ' ' + months[ds.getMonth()] + ' → ' + de.getDate() + ' ' + months[de.getMonth()] + ' ' + de.getFullYear();
+    document.getElementById('header-period').textContent = state.period;
+  }
+
   state.monthlyBudget = generatedPlan.monthlyBudget;
-  generatedPlan.weeks.forEach((w, i) => {
-    if (state.weeks[i]) {
-      state.weeks[i].name = w.name;
-      state.weeks[i].budget = w.budget;
-    }
-    state.plan[i] = w.plan.map(p => ({ cat: p.cat, label: p.label, amount: p.amount }));
-  });
+
+  // Resize weeks/expenses/plan arrays if needed
+  const nb = generatedPlan.weeks.length;
+  state.weeks = [];
+  state.expenses = [];
+  state.plan = [];
+  for (let i = 0; i < nb; i++) {
+    const w = generatedPlan.weeks[i];
+    state.weeks.push({ name: w.name, budget: w.budget });
+    state.expenses.push([]);
+    state.plan.push(w.plan.map(p => ({ cat: p.cat, label: p.label, amount: p.amount })));
+  }
 
   save();
   renderMonthly();
