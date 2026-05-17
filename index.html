@@ -119,6 +119,25 @@
   .danger-desc { font-size: 12px; color: var(--red); margin-bottom: 12px; opacity: 0.8; }
   .btn-danger { background: var(--red); color: white; border: none; border-radius: 8px; padding: 11px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
 
+  /* BILAN */
+  .bilan-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+  .bilan-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .bilan-title { font-family:'DM Serif Display',serif; font-size:18px; color:var(--text); }
+  .bilan-badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; }
+  .bilan-badge.good { background:#EAF4EE; color:#2D6A4F; }
+  .bilan-badge.bad { background:#FDEAEA; color:#B5292A; }
+  .bilan-summary { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
+  .bilan-stat { background:var(--surface2); border-radius:10px; padding:10px; text-align:center; }
+  .bilan-stat-label { font-size:11px; color:var(--text3); margin-bottom:2px; }
+  .bilan-stat-val { font-family:'DM Serif Display',serif; font-size:18px; }
+  .bilan-cat-item { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:0.5px solid var(--border); font-size:13px; }
+  .bilan-cat-item:last-child { border-bottom:none; }
+  .bilan-epargne { background:linear-gradient(135deg,#2D6A4F,#1D9E75); color:white; border-radius:12px; padding:16px; margin-top:12px; }
+  .bilan-epargne-title { font-size:13px; opacity:0.8; margin-bottom:4px; }
+  .bilan-epargne-amount { font-family:'DM Serif Display',serif; font-size:28px; }
+  .bilan-epargne-detail { font-size:12px; opacity:0.7; margin-top:8px; line-height:1.6; }
+  .bilan-chart-wrap { width:100%; margin:14px 0; }
+
   /* REMINDER BANNER */
   .reminder-banner { display:none; position:fixed; bottom:0; left:0; right:0; z-index:500; background:linear-gradient(135deg,#2D6A4F,#1D9E75); color:white; padding:16px 20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); max-width:480px; margin:0 auto; border-radius:16px 16px 0 0; }
   .reminder-banner.show { display:block; animation: slideUp 0.4s ease; }
@@ -198,12 +217,10 @@
 </div>
 
 <div class="nav-tabs">
-  <button class="nav-tab" onclick="showTab('monthly', this)">Vue mois</button>
   <button class="nav-tab active" onclick="showTab('weekly', this)">Semaine</button>
-  <button class="nav-tab" onclick="showTab('breakdown', this)">Catégories</button>
+  <button class="nav-tab" onclick="showTab('monthly', this)">Mois</button>
   <button class="nav-tab" onclick="showTab('plan', this)">📋 Plan</button>
-  <button class="nav-tab" onclick="showTab('history', this)">🗂️</button>
-  <button class="nav-tab" onclick="showTab('analysis', this)">📈</button>
+  <button class="nav-tab" onclick="showTab('bilan', this)">📊 Bilan</button>
   <button class="nav-tab" onclick="showTab('settings', this)">⚙️</button>
 </div>
 
@@ -268,15 +285,6 @@
     <div id="exp-list"></div>
   </div>
 
-  <!-- BREAKDOWN -->
-  <div id="breakdown" class="section">
-    <div class="card">
-      <div class="card-title">Total dépensé ce mois</div>
-      <div style="font-family:'DM Serif Display',serif;font-size:32px;color:var(--red);margin-bottom:16px;" id="bd-total">0,00 €</div>
-      <div id="cat-breakdown"><div class="empty-state"><div class="emoji">📊</div>Ajoutez des dépenses pour voir les catégories</div></div>
-    </div>
-  </div>
-
   <!-- PLAN -->
   <div id="plan" class="section">
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Budget prévisionnel par semaine</div>
@@ -285,30 +293,24 @@
     <div class="save-confirm" id="plan-confirm">✅ Plan sauvegardé !</div>
   </div>
 
-  <!-- HISTORY -->
-  <div id="history" class="section">
-    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Historique des mois</div>
-    <div id="history-content"><div class="empty-state"><div class="emoji">📅</div>Aucun mois archivé pour l\'instant.<br>L\'archivage se fait automatiquement lors du passage au nouveau mois.</div></div>
+  <!-- BILAN -->
+  <div id="bilan" class="section">
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Bilan & épargne</div>
 
-    <div style="margin-top:20px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Export / Import</div>
-      <div class="export-row">
-        <button class="export-btn" onclick="exportJSON()">⬇️ Export JSON</button>
-        <button class="export-btn" onclick="exportCSV()">⬇️ Export CSV</button>
-      </div>
-      <div class="import-area" onclick="document.getElementById('import-file').click()">
-        <div style="font-size:24px;margin-bottom:6px;">📂</div>
-        <div style="font-size:13px;color:var(--text2);">Importer un fichier JSON</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Tap pour choisir un fichier</div>
-      </div>
-      <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(this)" />
+    <!-- Épargne cumulée -->
+    <div class="bilan-epargne" id="bilan-epargne-total">
+      <div class="bilan-epargne-title">💰 Total à mettre en épargne ce mois</div>
+      <div class="bilan-epargne-amount" id="bilan-total-epargne">0,00 €</div>
+      <div class="bilan-epargne-detail" id="bilan-epargne-detail"></div>
     </div>
-  </div>
 
-  <!-- ANALYSIS -->
-  <div id="analysis" class="section">
-    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Analyse & évolution</div>
-    <div id="analysis-content"><div class="empty-state"><div class="emoji">📊</div>Archivez au moins un mois pour voir l'analyse.</div></div>
+    <!-- Bilans par semaine -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;">Bilan par semaine</div>
+    <div id="bilan-weeks"></div>
+
+    <!-- Bilan mensuel -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;">Bilan du mois</div>
+    <div id="bilan-month"></div>
   </div>
 
   <!-- SETTINGS -->
@@ -336,6 +338,30 @@
 
     <button class="btn-primary" onclick="saveSettings()" style="width:100%;padding:14px;font-size:15px;">💾 Sauvegarder</button>
     <div class="save-confirm" id="save-confirm">✅ Réglages sauvegardés !</div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Historique des mois archivés</div>
+      <div id="history-content"><div class="empty-state" style="padding:12px 0;"><div class="emoji">📅</div>Aucun mois archivé</div></div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Évolution (mois archivés)</div>
+      <div id="analysis-content"><div class="empty-state" style="padding:12px 0;"><div class="emoji">📈</div>Archivez un mois pour voir</div></div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Export / Import</div>
+      <div class="export-row">
+        <button class="export-btn" onclick="exportJSON()">⬇️ Export JSON</button>
+        <button class="export-btn" onclick="exportCSV()">⬇️ Export CSV</button>
+      </div>
+      <div class="import-area" onclick="document.getElementById('import-file').click()">
+        <div style="font-size:24px;margin-bottom:6px;">📂</div>
+        <div style="font-size:13px;color:var(--text2);">Importer un fichier JSON</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Tap pour choisir un fichier</div>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importJSON(this)" />
+    </div>
 
     <div class="danger-zone">
       <div class="danger-title">⚠️ Nouveau mois</div>
@@ -526,14 +552,12 @@ function showTab(id, btn) {
   btn.classList.add('active');
   if (id === 'monthly') renderMonthly();
   if (id === 'weekly') renderWeekly();
-  if (id === 'breakdown') renderBreakdown();
-  if (id === 'settings') renderSettings();
   if (id === 'plan') renderPlan();
-  if (id === 'history') renderHistory();
-  if (id === 'analysis') renderAnalysis();
+  if (id === 'bilan') renderBilan();
+  if (id === 'settings') { renderSettings(); renderHistory(); renderAnalysis(); }
 }
 
-function goSettings() { showTab('settings', document.querySelectorAll('.nav-tab')[3]); }
+function goSettings() { showTab('settings', document.querySelectorAll('.nav-tab')[4]); }
 
 // ── SETTINGS ──────────────────────────────────────
 function renderSettings() {
@@ -820,6 +844,138 @@ function addExpense() {
   renderWeekHero(); renderWeekList(); renderMonthly(); save();
 }
 
+// ── BILAN ─────────────────────────────────────────
+function renderBilan() {
+  let totalEpargne = 0;
+  const details = [];
+
+  // WEEKLY BILANS
+  const weeksHtml = state.weeks.map((w, i) => {
+    const exps = state.expenses[i] || [];
+    const spent = exps.reduce((s,e) => s + e.amount, 0);
+    const budget = w.budget;
+    const reste = budget - spent;
+    const pct = budget > 0 ? Math.round((spent / budget) * 100) : 0;
+    const isOver = reste < 0;
+
+    if (reste > 0) {
+      totalEpargne += reste;
+      details.push(w.name + ' : ' + fmt(reste));
+    }
+
+    // Cat breakdown for this week
+    const byCat = {};
+    exps.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+    const cats = Object.entries(byCat).sort((a,b) => b[1] - a[1]);
+    const maxCat = cats.length ? cats[0][1] : 1;
+
+    const catHtml = cats.map(([cat, amt]) => {
+      const planItem = (state.plan[i]||[]).find(p => p.cat === cat);
+      const planned = planItem ? planItem.amount : 0;
+      const diff = planned - amt;
+      return '<div class="bilan-cat-item">' +
+        '<span>' + (CAT_ICONS[cat]||'') + ' ' + cat + '</span>' +
+        '<span style="font-weight:500;color:' + (diff >= 0 ? '#2D6A4F' : '#B5292A') + '">' + fmt(amt) + (planned > 0 ? ' / ' + fmt(planned) : '') + '</span>' +
+      '</div>';
+    }).join('');
+
+    return '<div class="bilan-card">' +
+      '<div class="bilan-header">' +
+        '<div class="bilan-title">' + w.name + '</div>' +
+        '<span class="bilan-badge ' + (isOver ? 'bad' : 'good') + '">' + (isOver ? '⚠️ Dépassé' : '✅ OK') + '</span>' +
+      '</div>' +
+      '<div class="bilan-summary">' +
+        '<div class="bilan-stat"><div class="bilan-stat-label">Budget</div><div class="bilan-stat-val">' + fmt(budget) + '</div></div>' +
+        '<div class="bilan-stat"><div class="bilan-stat-label">Dépensé</div><div class="bilan-stat-val" style="color:#B5292A;">' + fmt(spent) + '</div></div>' +
+        '<div class="bilan-stat"><div class="bilan-stat-label">Reste</div><div class="bilan-stat-val" style="color:' + (isOver ? '#B5292A' : '#2D6A4F') + ';">' + fmt(reste) + '</div></div>' +
+      '</div>' +
+      (exps.length > 0 ? '<div class="bilan-chart-wrap"><canvas id="bilan-chart-w' + i + '" height="120"></canvas></div>' : '') +
+      (catHtml ? '<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Détail</div>' + catHtml : '<div style="text-align:center;color:var(--text3);font-size:13px;padding:10px 0;">Aucune dépense</div>') +
+      (reste > 0 ? '<div style="background:#EAF4EE;border-radius:8px;padding:10px;margin-top:10px;font-size:13px;color:#2D6A4F;text-align:center;font-weight:500;">💰 ' + fmt(reste) + ' à épargner</div>' : '') +
+    '</div>';
+  }).join('');
+
+  document.getElementById('bilan-weeks').innerHTML = weeksHtml;
+
+  // MONTHLY BILAN
+  const allExp = state.expenses.flat();
+  const totalSpent = allExp.reduce((s,e) => s + e.amount, 0);
+  const totalBudget = state.monthlyBudget;
+  const totalReste = totalBudget - totalSpent;
+  const totalPct = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+  const isOverMonth = totalReste < 0;
+
+  const byCatMonth = {};
+  allExp.forEach(e => { byCatMonth[e.cat] = (byCatMonth[e.cat] || 0) + e.amount; });
+  const catsMonth = Object.entries(byCatMonth).sort((a,b) => b[1] - a[1]);
+  const maxMonth = catsMonth.length ? catsMonth[0][1] : 1;
+
+  const catMonthHtml = catsMonth.map(([cat, amt]) => {
+    return '<div class="bilan-cat-item">' +
+      '<span>' + (CAT_ICONS[cat]||'') + ' ' + cat + '</span>' +
+      '<span style="font-weight:500;">' + fmt(amt) + ' <span style="color:var(--text3);font-weight:400;">(' + Math.round((amt/totalSpent)*100) + '%)</span></span>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('bilan-month').innerHTML =
+    '<div class="bilan-card">' +
+      '<div class="bilan-header">' +
+        '<div class="bilan-title">' + state.period + '</div>' +
+        '<span class="bilan-badge ' + (isOverMonth ? 'bad' : 'good') + '">' + (isOverMonth ? '⚠️ Dépassé' : '✅ OK') + '</span>' +
+      '</div>' +
+      '<div class="bilan-summary">' +
+        '<div class="bilan-stat"><div class="bilan-stat-label">Budget</div><div class="bilan-stat-val">' + fmt(totalBudget) + '</div></div>' +
+        '<div class="bilan-stat"><div class="bilan-stat-label">Dépensé</div><div class="bilan-stat-val" style="color:#B5292A;">' + fmt(totalSpent) + '</div></div>' +
+        '<div class="bilan-stat"><div class="bilan-stat-label">Reste</div><div class="bilan-stat-val" style="color:' + (isOverMonth ? '#B5292A' : '#2D6A4F') + ';">' + fmt(totalReste) + '</div></div>' +
+      '</div>' +
+      (allExp.length > 0 ? '<div class="bilan-chart-wrap"><canvas id="bilan-chart-month" height="160"></canvas></div>' : '') +
+      (catMonthHtml ? '<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Par catégorie</div>' + catMonthHtml : '') +
+    '</div>';
+
+  // ÉPARGNE TOTAL
+  document.getElementById('bilan-total-epargne').textContent = fmt(totalEpargne > 0 ? totalEpargne : 0);
+  document.getElementById('bilan-epargne-detail').innerHTML = details.length > 0 ? details.join('<br>') : 'Aucun reste pour le moment';
+
+  // RENDER CHARTS with delay
+  setTimeout(() => {
+    // Weekly donut charts
+    state.weeks.forEach((w, i) => {
+      const canvas = document.getElementById('bilan-chart-w' + i);
+      if (!canvas) return;
+      const exps = state.expenses[i] || [];
+      const byCat = {};
+      exps.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+      const cats = Object.entries(byCat).sort((a,b) => b[1] - a[1]);
+      if (cats.length === 0) return;
+      new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: cats.map(c => c[0]),
+          datasets: [{ data: cats.map(c => c[1]), backgroundColor: cats.map(c => CAT_COLORS[c[0]]||'#888'), borderWidth: 1 }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ font:{size:10}, boxWidth:10, padding:6 } } } }
+      });
+    });
+
+    // Monthly bar chart
+    const canvasMonth = document.getElementById('bilan-chart-month');
+    if (canvasMonth && catsMonth.length > 0) {
+      new Chart(canvasMonth, {
+        type: 'bar',
+        data: {
+          labels: catsMonth.map(c => c[0]),
+          datasets: [{ data: catsMonth.map(c => c[1]), backgroundColor: catsMonth.map(c => CAT_COLORS[c[0]]||'#888'), borderRadius: 4 }]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false, indexAxis:'y',
+          plugins:{ legend:{ display:false } },
+          scales:{ x:{ ticks:{ callback:v=>v+'€' }, grid:{display:false} }, y:{ grid:{display:false} } }
+        }
+      });
+    }
+  }, 200);
+}
+
 // ── HISTORY ───────────────────────────────────────
 function renderHistory() {
   const el = document.getElementById('history-content');
@@ -1055,26 +1211,6 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
 function delExp(id) {
   state.expenses[state.currentWeek] = state.expenses[state.currentWeek].filter(e => e.id !== id);
   renderWeekHero(); renderWeekList(); renderMonthly(); save();
-}
-
-// ── BREAKDOWN ─────────────────────────────────────
-function renderBreakdown() {
-  const all = state.expenses.flat();
-  const total = all.reduce((s, e) => s + e.amount, 0);
-  document.getElementById('bd-total').textContent = fmt(total);
-  const bycat = {};
-  all.forEach(e => { bycat[e.cat] = (bycat[e.cat]||0) + e.amount; });
-  const sorted = Object.entries(bycat).sort((a, b) => b[1]-a[1]);
-  const max = sorted.length ? sorted[0][1] : 1;
-  document.getElementById('cat-breakdown').innerHTML = sorted.length === 0
-    ? '<div class="empty-state"><div class="emoji">📊</div>Ajoutez des dépenses pour voir</div>'
-    : sorted.map(([cat, amt]) => `
-      <div class="cat-row">
-        <div class="cat-dot" style="background:${CAT_COLORS[cat]||'#888'};"></div>
-        <div class="cat-name">${cat}</div>
-        <div class="cat-bar-wrap"><div class="cat-bar" style="width:${Math.round((amt/max)*100)}%;background:${CAT_COLORS[cat]||'#888'};"></div></div>
-        <div class="cat-amt">${fmt(amt)}</div>
-      </div>`).join('');
 }
 
 // ── KEYBOARD ──────────────────────────────────────
