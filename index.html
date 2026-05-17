@@ -119,6 +119,26 @@
   .danger-desc { font-size: 12px; color: var(--red); margin-bottom: 12px; opacity: 0.8; }
   .btn-danger { background: var(--red); color: white; border: none; border-radius: 8px; padding: 11px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
 
+  /* SAVINGS TAB */
+  .sav-account { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
+  .sav-name { font-size:14px; font-weight:500; color:var(--text); }
+  .sav-auto { font-size:11px; color:var(--text3); margin-top:2px; }
+  .sav-balance { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); }
+  .sav-total-bar { background:linear-gradient(135deg,#2D6A4F,#1D9E75); color:white; border-radius:12px; padding:16px; margin-bottom:16px; }
+  .sav-total-label { font-size:12px; opacity:0.7; }
+  .sav-total-amount { font-family:'DM Serif Display',serif; font-size:32px; }
+  .sav-total-auto { font-size:12px; opacity:0.6; margin-top:6px; }
+  .sav-obj-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; }
+  .sav-obj-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .sav-obj-name { font-size:14px; font-weight:600; color:var(--text); }
+  .sav-obj-btns button { background:none; border:none; cursor:pointer; font-size:13px; margin-left:4px; }
+  .sav-obj-amounts { display:flex; justify-content:space-between; font-size:12px; color:var(--text2); margin-bottom:6px; }
+  .sav-obj-bar { height:8px; background:var(--surface2); border-radius:6px; overflow:hidden; margin-bottom:6px; }
+  .sav-obj-bar-fill { height:100%; border-radius:6px; transition:width 0.4s; }
+  .sav-obj-remaining { font-size:12px; color:var(--text3); }
+  .sav-summary { background:var(--surface2); border-radius:10px; padding:12px 14px; margin-top:16px; }
+  .sav-summary-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
+
   /* BUDGET GENERATOR */
   .gen-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
   .gen-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:10px; }
@@ -254,6 +274,7 @@
   <button class="nav-tab" onclick="showTab('monthly', this)">Mois</button>
   <button class="nav-tab" onclick="showTab('plan', this)">📋 Plan</button>
   <button class="nav-tab" onclick="showTab('bilan', this)">📊 Bilan</button>
+  <button class="nav-tab" onclick="showTab('savings', this)">💰</button>
   <button class="nav-tab" onclick="showTab('generator', this)">🤖</button>
   <button class="nav-tab" onclick="showTab('settings', this)">⚙️</button>
 </div>
@@ -325,6 +346,40 @@
     <div id="plan-content"></div>
     <button class="btn-primary" onclick="savePlan()" style="width:100%;padding:13px;font-size:14px;margin-top:4px;">💾 Sauvegarder le plan</button>
     <div class="save-confirm" id="plan-confirm">✅ Plan sauvegardé !</div>
+  </div>
+
+  <!-- SAVINGS -->
+  <div id="savings" class="section">
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">💰 Mon épargne</div>
+
+    <!-- Total -->
+    <div class="sav-total-bar" id="sav-total-bar">
+      <div class="sav-total-label">Épargne totale</div>
+      <div class="sav-total-amount" id="sav-total-amount">—</div>
+      <div class="sav-total-auto" id="sav-total-auto"></div>
+    </div>
+
+    <!-- Comptes -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Mes comptes</div>
+    <div id="sav-accounts"></div>
+    <div style="display:flex;gap:6px;margin:8px 0 16px;">
+      <input type="text" id="sav-new-name" placeholder="Nom du compte" style="flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;" />
+      <input type="number" id="sav-new-balance" placeholder="Solde €" style="width:80px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;font-size:13px;text-align:right;" />
+      <button onclick="addSavingsAccount()" style="background:var(--text);color:white;border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">+</button>
+    </div>
+
+    <!-- Objectifs -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">🎯 Mes objectifs</div>
+    <div id="sav-goals"></div>
+    <div class="goal-add-row" style="margin:8px 0 16px;">
+      <input type="text" id="sav-goal-name" placeholder="Nom" style="flex:1;" />
+      <input type="number" id="sav-goal-target" placeholder="Cible €" style="width:80px;" />
+      <input type="number" id="sav-goal-saved" placeholder="Déjà €" style="width:80px;" />
+      <button onclick="addSavingsGoal()" style="background:var(--text);color:white;border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">+</button>
+    </div>
+
+    <!-- Résumé -->
+    <div class="sav-summary" id="sav-summary"></div>
   </div>
 
   <!-- GENERATOR -->
@@ -438,24 +493,6 @@
 
   <!-- SETTINGS -->
   <div id="settings" class="section">
-
-    <div class="settings-block">
-      <div class="settings-block-title">💰 Épargne actuelle</div>
-      <div class="srow">
-        <div class="srow-label"><div class="srow-main">Montant total épargne</div></div>
-        <input type="number" class="srow-budget" id="s-savings" placeholder="11000" />
-      </div>
-    </div>
-
-    <div class="settings-block">
-      <div class="settings-block-title">🎯 Objectifs d'épargne</div>
-      <div id="settings-goals"></div>
-    </div>
-
-    <div class="settings-block">
-      <div class="settings-block-title">Charges fixes mensuelles</div>
-      <div id="settings-charges"></div>
-    </div>
 
     <div class="settings-block">
       <div class="settings-block-title">Période du mois</div>
@@ -608,15 +645,18 @@ let state = {
   ],
   expenses: [[], [], [], []],
   history: [],
-  savings: 11000,
+  savingsAccounts: [
+    { name: 'Livret A', balance: 616, autoMonthly: 200 },
+    { name: 'PEL', balance: 10188, autoMonthly: 0 },
+    { name: 'Casden', balance: 100, autoMonthly: 100 }
+  ],
   savingsGoals: [
-    { name: 'Apport immo', target: 30000, deadline: '2028-10', current: 11000 }
+    { name: 'Apport immo', target: 30000, saved: 10504 },
+    { name: 'Impôts sept', target: 800, saved: 300 }
   ],
   chargesFixes: [
     { label: 'Loyer', amount: 963.29 },
     { label: 'Prêt étudiant', amount: 437.53 },
-    { label: 'Épargne Livret A', amount: 200 },
-    { label: 'Casden', amount: 100 },
     { label: 'Navigo', amount: 90.80 },
     { label: 'Engie', amount: 31.62 },
     { label: 'Orange fibre', amount: 30.99 },
@@ -742,17 +782,17 @@ function showTab(id, btn) {
   if (id === 'weekly') renderWeekly();
   if (id === 'plan') renderPlan();
   if (id === 'bilan') renderBilan();
+  if (id === 'savings') renderSavings();
   if (id === 'generator') renderGenerator();
   if (id === 'settings') { renderSettings(); renderHistory(); renderAnalysis(); }
 }
 
-function goSettings() { showTab('settings', document.querySelectorAll('.nav-tab')[5]); }
+function goSettings() { showTab('settings', document.querySelectorAll('.nav-tab')[6]); }
 
 // ── SETTINGS ──────────────────────────────────────
 function renderSettings() {
   document.getElementById('s-period').value = state.period;
   document.getElementById('s-monthly').value = state.monthlyBudget;
-  document.getElementById('s-savings').value = state.savings || 0;
 
   const ws = document.getElementById('week-settings');
   ws.innerHTML = state.weeks.map((w, i) => `
@@ -764,37 +804,14 @@ function renderSettings() {
       <input class="srow-budget" type="number" id="sb${i}" value="${w.budget}" placeholder="budget" />
     </div>`).join('');
 
-  // Goals
-  const goalsEl = document.getElementById('settings-goals');
-  goalsEl.innerHTML = (state.savingsGoals||[]).map((g, i) => {
-    const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
-    return '<div class="goal-card">' +
-      '<div class="goal-header"><span class="goal-name">' + g.name + '</span>' +
-      '<button onclick="removeGoal(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">✕</button></div>' +
-      '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
-      '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
-      '<div class="goal-remaining">' + g.deadline + '</div></div>';
-  }).join('') || '<div style="color:var(--text3);font-size:13px;padding:8px 0;">Aucun objectif</div>';
-
-  // Charges fixes
-  const chargesEl = document.getElementById('settings-charges');
-  const total = (state.chargesFixes||[]).reduce((s,c) => s + c.amount, 0);
-  chargesEl.innerHTML = (state.chargesFixes||[]).map((c, i) =>
-    '<div class="gen-charge-row">' +
-    '<span style="flex:1;font-size:13px;">' + c.label + '</span>' +
-    '<span style="font-weight:500;font-size:13px;">' + fmt(c.amount) + '</span></div>'
-  ).join('') +
-  '<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-weight:600;font-size:13px;margin-top:4px;">' +
-  '<span>Total</span><span>' + fmt(total) + '</span></div>';
 }
 
 function saveSettings() {
   const period = document.getElementById('s-period').value.trim();
   const monthly = parseFloat(document.getElementById('s-monthly').value);
-  const savings = parseFloat(document.getElementById('s-savings').value);
   if (period) state.period = period;
   if (!isNaN(monthly) && monthly > 0) state.monthlyBudget = monthly;
-  if (!isNaN(savings)) state.savings = savings;
+
 
   state.weeks.forEach((w, i) => {
     const name = document.getElementById('sn'+i).value.trim();
@@ -821,11 +838,15 @@ function resetMonth() {
   const totalReste = state.monthlyBudget - totalSpent;
   if (totalReste > 0) {
     const newSavings = (state.savings || 0) + totalReste;
-    const confirmed = prompt('Épargne estimée : ' + fmt(newSavings) + ' (' + fmt(state.savings||0) + ' + ' + fmt(totalReste) + ' ce mois)\n\nModifiez si le montant réel est différent :', Math.round(newSavings));
+    const currentTotal = getTotalSavings();
+    const newTotal = currentTotal + totalReste;
+    const confirmed = prompt('Épargne estimée : ' + fmt(newTotal) + ' (' + fmt(currentTotal) + ' + ' + fmt(totalReste) + ' ce mois)\n\nModifiez si le montant réel est différent :', Math.round(newTotal));
     if (confirmed !== null) {
-      state.savings = parseFloat(confirmed) || newSavings;
-      // Update goals current amounts proportionally
-      state.savingsGoals.forEach(g => { g.current = state.savings; });
+      const diff = (parseFloat(confirmed) || newTotal) - currentTotal;
+      // Add diff to first savings account
+      if (state.savingsAccounts.length > 0) {
+        state.savingsAccounts[0].balance += diff;
+      }
     }
   }
   // Archive current month
@@ -1073,6 +1094,125 @@ function addExpense() {
   renderWeekHero(); renderWeekList(); renderMonthly(); save();
 }
 
+// ── SAVINGS ───────────────────────────────────────
+function getTotalSavings() {
+  return (state.savingsAccounts||[]).reduce((s,a) => s + (a.balance||0), 0);
+}
+
+function getTotalAutoEpargne() {
+  return (state.savingsAccounts||[]).reduce((s,a) => s + (a.autoMonthly||0), 0);
+}
+
+function renderSavings() {
+  const accounts = state.savingsAccounts || [];
+  const goals = state.savingsGoals || [];
+  const total = getTotalSavings();
+  const autoTotal = getTotalAutoEpargne();
+
+  // Total bar
+  document.getElementById('sav-total-amount').textContent = fmt(total);
+  document.getElementById('sav-total-auto').textContent = autoTotal > 0 ? 'dont ' + fmt(autoTotal) + '/mois en épargne automatique' : '';
+
+  // Accounts
+  document.getElementById('sav-accounts').innerHTML = accounts.map((a, i) =>
+    '<div class="sav-account">' +
+      '<div>' +
+        '<div class="sav-name">' + a.name + '</div>' +
+        (a.autoMonthly > 0 ? '<div class="sav-auto">virement auto +' + fmt(a.autoMonthly) + '/mois</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<div class="sav-balance">' + fmt(a.balance) + '</div>' +
+        '<button onclick="editSavingsAccount(' + i + ')" style="background:none;border:none;cursor:pointer;font-size:13px;">✏️</button>' +
+        '<button onclick="removeSavingsAccount(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">✕</button>' +
+      '</div>' +
+    '</div>'
+  ).join('') || '<div style="color:var(--text3);font-size:13px;padding:8px;">Aucun compte</div>';
+
+  // Goals
+  document.getElementById('sav-goals').innerHTML = goals.map((g, i) => {
+    const pct = g.target > 0 ? Math.min(100, Math.round((g.saved / g.target) * 100)) : 0;
+    const remaining = g.target - g.saved;
+    const barColor = pct >= 100 ? '#2D6A4F' : pct > 50 ? '#1D9E75' : '#C2621A';
+    return '<div class="sav-obj-card">' +
+      '<div class="sav-obj-header">' +
+        '<span class="sav-obj-name">' + g.name + '</span>' +
+        '<span class="sav-obj-btns">' +
+          '<button onclick="editGoal(' + i + ')">✏️</button>' +
+          '<button onclick="removeGoal(' + i + ')" style="color:var(--text3);">✕</button>' +
+        '</span>' +
+      '</div>' +
+      '<div class="sav-obj-amounts">' +
+        '<span>' + fmt(g.saved) + ' / ' + fmt(g.target) + '</span>' +
+        '<span>' + pct + '%</span>' +
+      '</div>' +
+      '<div class="sav-obj-bar"><div class="sav-obj-bar-fill" style="width:' + pct + '%;background:' + barColor + ';"></div></div>' +
+      (remaining > 0 ? '<div class="sav-obj-remaining">Il manque ' + fmt(remaining) + '</div>' : '<div class="sav-obj-remaining" style="color:#2D6A4F;">✅ Objectif atteint !</div>') +
+    '</div>';
+  }).join('') || '<div style="color:var(--text3);font-size:13px;padding:8px;">Aucun objectif</div>';
+
+  // Summary
+  const totalGoals = goals.reduce((s,g) => s + g.target, 0);
+  const totalSaved = goals.reduce((s,g) => s + g.saved, 0);
+  const totalRemaining = totalGoals - totalSaved;
+  document.getElementById('sav-summary').innerHTML =
+    '<div class="sav-summary-row"><span>Total objectifs</span><span style="font-weight:500;">' + fmt(totalGoals) + '</span></div>' +
+    '<div class="sav-summary-row"><span>Déjà épargné (objectifs)</span><span style="font-weight:500;color:#2D6A4F;">' + fmt(totalSaved) + '</span></div>' +
+    '<div class="sav-summary-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;">' +
+      '<span style="font-weight:600;">' + (totalRemaining > 0 ? 'Il manque au total' : '✅ Objectifs atteints') + '</span>' +
+      '<span style="font-weight:600;color:' + (totalRemaining > 0 ? '#B5292A' : '#2D6A4F') + ';">' + fmt(Math.abs(totalRemaining)) + '</span>' +
+    '</div>' +
+    '<div class="sav-summary-row"><span>Épargne totale (tous comptes)</span><span style="font-weight:500;">' + fmt(total) + '</span></div>' +
+    (total < totalSaved ? '<div class="sav-summary-row" style="color:#B5292A;font-size:12px;"><span>⚠️ Vos objectifs dépassent votre épargne réelle</span></div>' : '');
+}
+
+function addSavingsAccount() {
+  const name = document.getElementById('sav-new-name').value.trim();
+  const balance = parseFloat(document.getElementById('sav-new-balance').value) || 0;
+  if (!name) return;
+  const auto = parseFloat(prompt('Virement automatique mensuel (€) ? (0 si aucun)')) || 0;
+  state.savingsAccounts.push({ name, balance, autoMonthly: auto });
+  document.getElementById('sav-new-name').value = '';
+  document.getElementById('sav-new-balance').value = '';
+  save();
+  renderSavings();
+}
+
+function editSavingsAccount(i) {
+  const a = state.savingsAccounts[i];
+  if (!a) return;
+  const name = prompt('Nom du compte :', a.name);
+  if (name === null) return;
+  const balance = prompt('Solde actuel (€) :', a.balance);
+  if (balance === null) return;
+  const auto = prompt('Virement automatique mensuel (€) :', a.autoMonthly);
+  if (auto === null) return;
+  a.name = name || a.name;
+  a.balance = parseFloat(balance) || a.balance;
+  a.autoMonthly = parseFloat(auto) || 0;
+  save();
+  renderSavings();
+}
+
+function removeSavingsAccount(i) {
+  if (!confirm('Supprimer ce compte ?')) return;
+  state.savingsAccounts.splice(i, 1);
+  save();
+  renderSavings();
+}
+
+function addSavingsGoal() {
+  const name = document.getElementById('sav-goal-name').value.trim();
+  const target = parseFloat(document.getElementById('sav-goal-target').value) || 0;
+  const saved = parseFloat(document.getElementById('sav-goal-saved').value) || 0;
+  if (!name || target <= 0) return;
+  state.savingsGoals.push({ name, target, saved });
+  document.getElementById('sav-goal-name').value = '';
+  document.getElementById('sav-goal-target').value = '';
+  document.getElementById('sav-goal-saved').value = '';
+  save();
+  renderSavings();
+}
+
 // ── GENERATOR ─────────────────────────────────────
 function updateWeekFields() {
   const start = document.getElementById('gen-date-start').value;
@@ -1132,8 +1272,8 @@ function renderGenerator() {
   // Render goals
   const goalsList = document.getElementById('gen-goals-list');
   goalsList.innerHTML = (state.savingsGoals||[]).map((g, i) => {
-    const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
-    const remaining = g.target - g.current;
+    const pct = g.target > 0 ? Math.min(100, Math.round(((g.saved||0) / g.target) * 100)) : 0;
+    const remaining = g.target - (g.saved||0);
     const now = new Date();
     const [dy,dm] = g.deadline.split('-').map(Number);
     const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
@@ -1147,7 +1287,7 @@ function renderGenerator() {
           '<button onclick="removeGoal(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">✕</button>' +
         '</span>' +
       '</div>' +
-      '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
+      '<div class="goal-amounts"><span>' + fmt(g.saved||0) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
       '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
       (perMonth > 0 ? '<div class="goal-remaining">→ ' + fmt(perMonth) + '/mois pendant ' + monthsLeft + ' mois' +
         (!isRealistic ? ' <span style="color:#B5292A;font-weight:500;">(⚠️ difficile)</span>' : '') +
@@ -1177,7 +1317,7 @@ function addGoal() {
   const target = parseFloat(document.getElementById('gen-goal-target').value);
   const deadline = document.getElementById('gen-goal-deadline').value;
   if (!name || isNaN(target) || !deadline) return;
-  state.savingsGoals.push({ name, target, deadline, current: state.savings || 0 });
+  state.savingsGoals.push({ name, target, deadline, saved: 0 });
   document.getElementById('gen-goal-name').value = '';
   document.getElementById('gen-goal-target').value = '';
   document.getElementById('gen-goal-deadline').value = '';
@@ -1193,7 +1333,7 @@ function editGoal(i) {
   editingGoalIdx = i;
   document.getElementById('goal-edit-name').value = g.name;
   document.getElementById('goal-edit-target').value = g.target;
-  document.getElementById('goal-edit-current').value = g.current;
+  document.getElementById('goal-edit-current').value = g.saved || 0;
   document.getElementById('goal-edit-deadline').value = g.deadline;
   document.getElementById('goal-edit-modal').classList.add('open');
 }
@@ -1209,11 +1349,12 @@ function saveGoalEdit() {
   if (!g) return;
   g.name = document.getElementById('goal-edit-name').value.trim() || g.name;
   g.target = parseFloat(document.getElementById('goal-edit-target').value) || g.target;
-  g.current = parseFloat(document.getElementById('goal-edit-current').value) || 0;
+  g.saved = parseFloat(document.getElementById('goal-edit-current').value) || 0;
   g.deadline = document.getElementById('goal-edit-deadline').value || g.deadline;
   closeGoalModal();
   save();
   renderGenerator();
+  renderSavings();
   renderSettings();
 }
 
@@ -1267,11 +1408,8 @@ async function generateBudget() {
 
   // Goals summary
   const goalsSummary = (state.savingsGoals||[]).map(g => {
-    const remaining = g.target - g.current;
-    const now = new Date();
-    const [dy,dm] = g.deadline.split('-').map(Number);
-    const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
-    return g.name + ': ' + remaining.toFixed(0) + ' EUR restants, deadline ' + g.deadline + ', ' + monthsLeft + ' mois restants';
+    const remaining = g.target - (g.saved || 0);
+    return g.name + ': ' + (g.saved||0).toFixed(0) + ' EUR épargnés sur ' + g.target + ' EUR cible, il manque ' + remaining.toFixed(0) + ' EUR';
   }).join('; ');
 
   // History summary
@@ -1289,7 +1427,7 @@ async function generateBudget() {
 REVENUS: ${totalRevenu.toFixed(2)} EUR (salaire: ${salary}, extra: ${extra})
 CHARGES FIXES: ${chargesTotal.toFixed(2)} EUR (${chargesDetail})
 DISPONIBLE POUR VIVRE: ${dispo.toFixed(2)} EUR
-ÉPARGNE ACTUELLE: ${(state.savings||0).toFixed(2)} EUR
+ÉPARGNE TOTALE: ${getTotalSavings().toFixed(2)} EUR\nÉPARGNE AUTO MENSUELLE: ${getTotalAutoEpargne().toFixed(2)} EUR (déjà prélevé en charges)
 OBJECTIFS ÉPARGNE: ${goalsSummary || 'aucun'}
 DÉPENSES MOIS PRÉCÉDENT: ${pastSummary || 'pas de données'}
 HISTORIQUE: ${histSummary || 'pas de données'}
@@ -1525,21 +1663,18 @@ function renderBilan() {
   const goalsEl = document.getElementById('bilan-goals');
   if ((state.savingsGoals||[]).length > 0) {
     goalsEl.innerHTML = state.savingsGoals.map(g => {
-      const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
-      const remaining = g.target - g.current;
-      const now = new Date();
-      const [dy,dm] = g.deadline.split('-').map(Number);
-      const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
-      const perMonth = remaining > 0 ? Math.ceil(remaining / monthsLeft) : 0;
+      const saved = g.saved || 0;
+      const pct = g.target > 0 ? Math.min(100, Math.round((saved / g.target) * 100)) : 0;
+      const remaining = g.target - saved;
       return '<div class="goal-card">' +
-        '<div class="goal-header"><span class="goal-name">' + g.name + '</span><span class="goal-deadline">' + g.deadline + '</span></div>' +
-        '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
+        '<div class="goal-header"><span class="goal-name">' + g.name + '</span></div>' +
+        '<div class="goal-amounts"><span>' + fmt(saved) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
         '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
-        (perMonth > 0 ? '<div class="goal-remaining">→ ' + fmt(perMonth) + '/mois pendant ' + monthsLeft + ' mois</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
+        (remaining > 0 ? '<div class="goal-remaining">Il manque ' + fmt(remaining) + '</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
       '</div>';
     }).join('');
   } else {
-    goalsEl.innerHTML = '<div style="color:var(--text3);font-size:13px;">Aucun objectif — ajoutez-en dans 🤖 Assistant</div>';
+    goalsEl.innerHTML = '<div style="color:var(--text3);font-size:13px;">Aucun objectif — ajoutez-en dans 💰 Épargne</div>';
   }
 
   // RENDER CHARTS with delay
