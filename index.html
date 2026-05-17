@@ -299,7 +299,7 @@
 
     <!-- Épargne cumulée -->
     <div class="bilan-epargne" id="bilan-epargne-total">
-      <div class="bilan-epargne-title">💰 Total à mettre en épargne ce mois</div>
+      <div class="bilan-epargne-title" id="bilan-epargne-title-text">💰 Total à mettre en épargne ce mois</div>
       <div class="bilan-epargne-amount" id="bilan-total-epargne">0,00 €</div>
       <div class="bilan-epargne-detail" id="bilan-epargne-detail"></div>
     </div>
@@ -860,7 +860,10 @@ function renderBilan() {
 
     if (reste > 0) {
       totalEpargne += reste;
-      details.push(w.name + ' : ' + fmt(reste));
+      details.push('✅ ' + w.name + ' : +' + fmt(reste));
+    } else if (reste < 0) {
+      totalEpargne += reste; // soustrait le dépassement
+      details.push('⚠️ ' + w.name + ' : ' + fmt(reste));
     }
 
     // Cat breakdown for this week
@@ -891,7 +894,8 @@ function renderBilan() {
       '</div>' +
       (exps.length > 0 ? '<div class="bilan-chart-wrap"><canvas id="bilan-chart-w' + i + '" height="120"></canvas></div>' : '') +
       (catHtml ? '<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Détail</div>' + catHtml : '<div style="text-align:center;color:var(--text3);font-size:13px;padding:10px 0;">Aucune dépense</div>') +
-      (reste > 0 ? '<div style="background:#EAF4EE;border-radius:8px;padding:10px;margin-top:10px;font-size:13px;color:#2D6A4F;text-align:center;font-weight:500;">💰 ' + fmt(reste) + ' à épargner</div>' : '') +
+      (reste > 0 ? '<div style="background:#EAF4EE;border-radius:8px;padding:10px;margin-top:10px;font-size:13px;color:#2D6A4F;text-align:center;font-weight:500;">💰 ' + fmt(reste) + ' à épargner</div>' :
+       reste < 0 ? '<div style="background:#FDEAEA;border-radius:8px;padding:10px;margin-top:10px;font-size:13px;color:#B5292A;text-align:center;font-weight:500;">⚠️ Dépassement de ' + fmt(Math.abs(reste)) + ' — à déduire le mois prochain</div>' : '') +
     '</div>';
   }).join('');
 
@@ -933,8 +937,25 @@ function renderBilan() {
     '</div>';
 
   // ÉPARGNE TOTAL
-  document.getElementById('bilan-total-epargne').textContent = fmt(totalEpargne > 0 ? totalEpargne : 0);
-  document.getElementById('bilan-epargne-detail').innerHTML = details.length > 0 ? details.join('<br>') : 'Aucun reste pour le moment';
+  const epargneEl = document.getElementById('bilan-total-epargne');
+  const epargneTotalEl = document.getElementById('bilan-epargne-total');
+  const detailEl = document.getElementById('bilan-epargne-detail');
+
+  epargneEl.textContent = fmt(Math.abs(totalEpargne));
+
+  if (totalEpargne > 0) {
+    epargneTotalEl.style.background = 'linear-gradient(135deg,#2D6A4F,#1D9E75)';
+    document.getElementById('bilan-epargne-title-text').textContent = '💰 Total à mettre en épargne ce mois';
+    detailEl.innerHTML = details.join('<br>');
+  } else if (totalEpargne < 0) {
+    epargneTotalEl.style.background = 'linear-gradient(135deg,#8B2020,#B5292A)';
+    document.getElementById('bilan-epargne-title-text').textContent = '⚠️ Dépassement — à déduire du budget du mois prochain';
+    detailEl.innerHTML = details.join('<br>') + '<br><br>👉 Pensez à réduire le budget du mois prochain de ' + fmt(Math.abs(totalEpargne));
+  } else {
+    epargneTotalEl.style.background = 'linear-gradient(135deg,#6B6560,#888780)';
+    document.getElementById('bilan-epargne-title-text').textContent = '📊 Budget parfaitement utilisé';
+    detailEl.innerHTML = 'Ni reste ni dépassement ce mois';
+  }
 
   // RENDER CHARTS with delay
   setTimeout(() => {
