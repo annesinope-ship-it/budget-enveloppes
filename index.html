@@ -119,6 +119,39 @@
   .danger-desc { font-size: 12px; color: var(--red); margin-bottom: 12px; opacity: 0.8; }
   .btn-danger { background: var(--red); color: white; border: none; border-radius: 8px; padding: 11px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; }
 
+  /* BUDGET GENERATOR */
+  .gen-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+  .gen-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:10px; }
+  .gen-field { margin-bottom:10px; }
+  .gen-field label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:5px; }
+  .gen-field input, .gen-field textarea { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-family:'DM Sans',sans-serif; font-size:14px; background:white; color:var(--text); }
+  .gen-field textarea { min-height:60px; resize:vertical; }
+  .gen-field input:focus, .gen-field textarea:focus { outline:none; border-color:var(--text); }
+  .gen-charges-list { max-height:200px; overflow-y:auto; margin-bottom:8px; }
+  .gen-charge-row { display:flex; align-items:center; gap:6px; padding:5px 0; border-bottom:0.5px solid var(--border); font-size:13px; }
+  .gen-charge-row:last-child { border-bottom:none; }
+  .gen-charge-row input[type=text] { flex:1; border:none; background:transparent; font-size:13px; color:var(--text); padding:2px; }
+  .gen-charge-row input[type=number] { width:80px; border:1px solid var(--border); border-radius:6px; padding:4px 6px; font-size:13px; text-align:right; }
+  .gen-charge-row button { background:none; border:none; cursor:pointer; color:var(--text3); font-size:14px; }
+  .gen-result { background:var(--text); color:white; border-radius:var(--radius); padding:20px; margin-top:12px; display:none; }
+  .gen-result-title { font-size:14px; opacity:0.7; margin-bottom:8px; }
+  .gen-result-content { font-size:13px; line-height:1.8; white-space:pre-line; }
+  .gen-loading { text-align:center; padding:30px; color:var(--text3); font-size:14px; display:none; }
+  .gen-loading.show { display:block; }
+  .gen-apply-btn { background:#2D6A4F; color:white; border:none; border-radius:10px; padding:14px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; width:100%; margin-top:12px; display:none; }
+
+  /* GOALS */
+  .goal-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; }
+  .goal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .goal-name { font-size:14px; font-weight:600; color:var(--text); }
+  .goal-deadline { font-size:11px; color:var(--text3); }
+  .goal-amounts { display:flex; justify-content:space-between; font-size:12px; color:var(--text2); margin-bottom:6px; }
+  .goal-bar-wrap { height:8px; background:var(--surface2); border-radius:6px; overflow:hidden; margin-bottom:6px; }
+  .goal-bar { height:100%; border-radius:6px; background:var(--green); transition:width 0.4s; }
+  .goal-remaining { font-size:12px; color:var(--text3); }
+  .goal-add-row { display:flex; gap:6px; flex-wrap:wrap; }
+  .goal-add-row input { flex:1; min-width:80px; border:1px solid var(--border); border-radius:8px; padding:7px 8px; font-family:'DM Sans',sans-serif; font-size:12px; }
+
   /* BILAN */
   .bilan-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
   .bilan-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
@@ -221,6 +254,7 @@
   <button class="nav-tab" onclick="showTab('monthly', this)">Mois</button>
   <button class="nav-tab" onclick="showTab('plan', this)">📋 Plan</button>
   <button class="nav-tab" onclick="showTab('bilan', this)">📊 Bilan</button>
+  <button class="nav-tab" onclick="showTab('generator', this)">🤖</button>
   <button class="nav-tab" onclick="showTab('settings', this)">⚙️</button>
 </div>
 
@@ -293,6 +327,69 @@
     <div class="save-confirm" id="plan-confirm">✅ Plan sauvegardé !</div>
   </div>
 
+  <!-- GENERATOR -->
+  <div id="generator" class="section">
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">🤖 Assistant budget</div>
+
+    <div class="gen-card">
+      <div class="gen-title">Revenus du mois</div>
+      <div class="gen-field">
+        <label>Salaire net</label>
+        <input type="number" id="gen-salary" placeholder="ex: 2932" />
+      </div>
+      <div class="gen-field">
+        <label>Revenus extra (optionnel)</label>
+        <input type="number" id="gen-extra" placeholder="ex: 500 (don famille, remboursement...)" />
+      </div>
+    </div>
+
+    <div class="gen-card">
+      <div class="gen-title">Charges fixes du mois <span style="font-weight:400;color:var(--text3);font-size:11px;">— modifiez si besoin</span></div>
+      <div class="gen-charges-list" id="gen-charges-list"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <input type="text" id="gen-charge-name" placeholder="Nouvelle charge" style="flex:1;border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;" />
+        <input type="number" id="gen-charge-amount" placeholder="Montant" style="width:80px;border:1px solid var(--border);border-radius:6px;padding:6px;font-size:12px;text-align:right;" />
+        <button onclick="addGenCharge()" style="background:var(--text);color:white;border:none;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;">+</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding:8px 0;border-top:1px solid var(--border);font-size:13px;font-weight:600;">
+        <span>Total charges</span>
+        <span id="gen-charges-total">—</span>
+      </div>
+    </div>
+
+    <div class="gen-card">
+      <div class="gen-title">Objectifs d'épargne</div>
+      <div id="gen-goals-list"></div>
+      <div class="goal-add-row" style="margin-top:8px;">
+        <input type="text" id="gen-goal-name" placeholder="Nom (ex: Vacances)" />
+        <input type="number" id="gen-goal-target" placeholder="Montant €" style="width:80px;" />
+        <input type="month" id="gen-goal-deadline" />
+        <button onclick="addGoal()" style="background:var(--text);color:white;border:none;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;">+</button>
+      </div>
+    </div>
+
+    <div class="gen-card">
+      <div class="gen-title">Note libre (optionnel)</div>
+      <div class="gen-field" style="margin:0;">
+        <textarea id="gen-notes" placeholder="ex: pas de sport ce mois, anniversaire le 15, j'ai dépassé de 50€ le mois dernier..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="generateBudget()" style="width:100%;padding:14px;font-size:15px;">🤖 Générer mon budget</button>
+
+    <div class="gen-loading" id="gen-loading">
+      <div style="font-size:28px;margin-bottom:10px;">🤖</div>
+      Analyse en cours...<br>
+      <span style="font-size:12px;color:var(--text3);">L'IA analyse vos dépenses passées et prépare votre budget</span>
+    </div>
+
+    <div class="gen-result" id="gen-result">
+      <div class="gen-result-title">💡 Budget proposé par l'IA</div>
+      <div class="gen-result-content" id="gen-result-content"></div>
+    </div>
+    <button class="gen-apply-btn" id="gen-apply-btn" onclick="applyGeneratedBudget()">✅ Appliquer ce budget</button>
+  </div>
+
   <!-- BILAN -->
   <div id="bilan" class="section">
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Bilan & épargne</div>
@@ -303,6 +400,10 @@
       <div class="bilan-epargne-amount" id="bilan-total-epargne">0,00 €</div>
       <div class="bilan-epargne-detail" id="bilan-epargne-detail"></div>
     </div>
+
+    <!-- Objectifs d'épargne -->
+    <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;">🎯 Objectifs d'épargne</div>
+    <div id="bilan-goals"></div>
 
     <!-- Bilans par semaine -->
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;">Bilan par semaine</div>
@@ -315,6 +416,24 @@
 
   <!-- SETTINGS -->
   <div id="settings" class="section">
+
+    <div class="settings-block">
+      <div class="settings-block-title">💰 Épargne actuelle</div>
+      <div class="srow">
+        <div class="srow-label"><div class="srow-main">Montant total épargne</div></div>
+        <input type="number" class="srow-budget" id="s-savings" placeholder="11000" />
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">🎯 Objectifs d'épargne</div>
+      <div id="settings-goals"></div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-block-title">Charges fixes mensuelles</div>
+      <div id="settings-charges"></div>
+    </div>
 
     <div class="settings-block">
       <div class="settings-block-title">Période du mois</div>
@@ -440,6 +559,26 @@ let state = {
   ],
   expenses: [[], [], [], []],
   history: [],
+  savings: 11000,
+  savingsGoals: [
+    { name: 'Apport immo', target: 30000, deadline: '2028-10', current: 11000 }
+  ],
+  chargesFixes: [
+    { label: 'Loyer', amount: 963.29 },
+    { label: 'Prêt étudiant', amount: 437.53 },
+    { label: 'Épargne Livret A', amount: 200 },
+    { label: 'Casden', amount: 100 },
+    { label: 'Navigo', amount: 90.80 },
+    { label: 'Engie', amount: 31.62 },
+    { label: 'Orange fibre', amount: 30.99 },
+    { label: 'Claude.ai', amount: 21.60 },
+    { label: 'Orange mobile', amount: 15.99 },
+    { label: 'NordVPN', amount: 13.91 },
+    { label: 'Spotify', amount: 11.12 },
+    { label: 'Body Minute', amount: 9.90 },
+    { label: 'Uber One', amount: 5.99 },
+    { label: 'Google One', amount: 1.99 }
+  ],
   plan: [
     [
       { cat: 'Sport', label: 'Monday Sports (1er versement)', amount: 200 },
@@ -554,15 +693,18 @@ function showTab(id, btn) {
   if (id === 'weekly') renderWeekly();
   if (id === 'plan') renderPlan();
   if (id === 'bilan') renderBilan();
+  if (id === 'generator') renderGenerator();
   if (id === 'settings') { renderSettings(); renderHistory(); renderAnalysis(); }
 }
 
-function goSettings() { showTab('settings', document.querySelectorAll('.nav-tab')[4]); }
+function goSettings() { showTab('settings', document.querySelectorAll('.nav-tab')[5]); }
 
 // ── SETTINGS ──────────────────────────────────────
 function renderSettings() {
   document.getElementById('s-period').value = state.period;
   document.getElementById('s-monthly').value = state.monthlyBudget;
+  document.getElementById('s-savings').value = state.savings || 0;
+
   const ws = document.getElementById('week-settings');
   ws.innerHTML = state.weeks.map((w, i) => `
     <div class="srow">
@@ -572,13 +714,38 @@ function renderSettings() {
       </div>
       <input class="srow-budget" type="number" id="sb${i}" value="${w.budget}" placeholder="budget" />
     </div>`).join('');
+
+  // Goals
+  const goalsEl = document.getElementById('settings-goals');
+  goalsEl.innerHTML = (state.savingsGoals||[]).map((g, i) => {
+    const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+    return '<div class="goal-card">' +
+      '<div class="goal-header"><span class="goal-name">' + g.name + '</span>' +
+      '<button onclick="removeGoal(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">✕</button></div>' +
+      '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
+      '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
+      '<div class="goal-remaining">' + g.deadline + '</div></div>';
+  }).join('') || '<div style="color:var(--text3);font-size:13px;padding:8px 0;">Aucun objectif</div>';
+
+  // Charges fixes
+  const chargesEl = document.getElementById('settings-charges');
+  const total = (state.chargesFixes||[]).reduce((s,c) => s + c.amount, 0);
+  chargesEl.innerHTML = (state.chargesFixes||[]).map((c, i) =>
+    '<div class="gen-charge-row">' +
+    '<span style="flex:1;font-size:13px;">' + c.label + '</span>' +
+    '<span style="font-weight:500;font-size:13px;">' + fmt(c.amount) + '</span></div>'
+  ).join('') +
+  '<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);font-weight:600;font-size:13px;margin-top:4px;">' +
+  '<span>Total</span><span>' + fmt(total) + '</span></div>';
 }
 
 function saveSettings() {
   const period = document.getElementById('s-period').value.trim();
   const monthly = parseFloat(document.getElementById('s-monthly').value);
+  const savings = parseFloat(document.getElementById('s-savings').value);
   if (period) state.period = period;
   if (!isNaN(monthly) && monthly > 0) state.monthlyBudget = monthly;
+  if (!isNaN(savings)) state.savings = savings;
 
   state.weeks.forEach((w, i) => {
     const name = document.getElementById('sn'+i).value.trim();
@@ -599,6 +766,19 @@ function saveSettings() {
 
 function resetMonth() {
   if (!confirm('Archiver ce mois et remettre à zéro ?')) return;
+
+  // Calculate savings to add
+  const totalSpent = state.expenses.flat().reduce((s,e) => s + e.amount, 0);
+  const totalReste = state.monthlyBudget - totalSpent;
+  if (totalReste > 0) {
+    const newSavings = (state.savings || 0) + totalReste;
+    const confirmed = prompt('Épargne estimée : ' + fmt(newSavings) + ' (' + fmt(state.savings||0) + ' + ' + fmt(totalReste) + ' ce mois)\n\nModifiez si le montant réel est différent :', Math.round(newSavings));
+    if (confirmed !== null) {
+      state.savings = parseFloat(confirmed) || newSavings;
+      // Update goals current amounts proportionally
+      state.savingsGoals.forEach(g => { g.current = state.savings; });
+    }
+  }
   // Archive current month
   const allExp = state.expenses.flat();
   if (allExp.length > 0) {
@@ -844,6 +1024,211 @@ function addExpense() {
   renderWeekHero(); renderWeekList(); renderMonthly(); save();
 }
 
+// ── GENERATOR ─────────────────────────────────────
+function renderGenerator() {
+  // Render charges list
+  const list = document.getElementById('gen-charges-list');
+  const charges = state.chargesFixes || [];
+  list.innerHTML = charges.map((c, i) =>
+    '<div class="gen-charge-row">' +
+    '<input type="text" value="' + c.label + '" onchange="state.chargesFixes[' + i + '].label=this.value" />' +
+    '<input type="number" value="' + c.amount + '" onchange="state.chargesFixes[' + i + '].amount=parseFloat(this.value)||0;updateChargesTotal()" style="width:80px;border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px;text-align:right;" />' +
+    '<button onclick="state.chargesFixes.splice(' + i + ',1);renderGenerator();" style="color:var(--text3);">✕</button></div>'
+  ).join('');
+  updateChargesTotal();
+
+  // Render goals
+  const goalsList = document.getElementById('gen-goals-list');
+  goalsList.innerHTML = (state.savingsGoals||[]).map((g, i) => {
+    const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+    const remaining = g.target - g.current;
+    const now = new Date();
+    const [dy,dm] = g.deadline.split('-').map(Number);
+    const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
+    const perMonth = remaining > 0 ? Math.ceil(remaining / monthsLeft) : 0;
+    return '<div class="goal-card">' +
+      '<div class="goal-header"><span class="goal-name">' + g.name + '</span><span class="goal-deadline">' + g.deadline + '</span></div>' +
+      '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
+      '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
+      (perMonth > 0 ? '<div class="goal-remaining">→ ' + fmt(perMonth) + '/mois pendant ' + monthsLeft + ' mois</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
+    '</div>';
+  }).join('') || '<div style="color:var(--text3);font-size:13px;">Aucun objectif</div>';
+}
+
+function updateChargesTotal() {
+  const total = (state.chargesFixes||[]).reduce((s,c) => s + (c.amount||0), 0);
+  document.getElementById('gen-charges-total').textContent = fmt(total);
+}
+
+function addGenCharge() {
+  const name = document.getElementById('gen-charge-name').value.trim();
+  const amount = parseFloat(document.getElementById('gen-charge-amount').value);
+  if (!name || isNaN(amount)) return;
+  state.chargesFixes.push({ label: name, amount });
+  document.getElementById('gen-charge-name').value = '';
+  document.getElementById('gen-charge-amount').value = '';
+  renderGenerator();
+  save();
+}
+
+function addGoal() {
+  const name = document.getElementById('gen-goal-name').value.trim();
+  const target = parseFloat(document.getElementById('gen-goal-target').value);
+  const deadline = document.getElementById('gen-goal-deadline').value;
+  if (!name || isNaN(target) || !deadline) return;
+  state.savingsGoals.push({ name, target, deadline, current: state.savings || 0 });
+  document.getElementById('gen-goal-name').value = '';
+  document.getElementById('gen-goal-target').value = '';
+  document.getElementById('gen-goal-deadline').value = '';
+  renderGenerator();
+  save();
+}
+
+function removeGoal(i) {
+  state.savingsGoals.splice(i, 1);
+  renderGenerator();
+  save();
+}
+
+let generatedPlan = null;
+
+async function generateBudget() {
+  const salary = parseFloat(document.getElementById('gen-salary').value) || 0;
+  const extra = parseFloat(document.getElementById('gen-extra').value) || 0;
+  const notes = document.getElementById('gen-notes').value.trim();
+  const chargesTotal = (state.chargesFixes||[]).reduce((s,c) => s + (c.amount||0), 0);
+
+  if (salary <= 0) { alert('Entrez votre salaire'); return; }
+
+  // Build context for AI
+  const totalRevenu = salary + extra;
+  const dispo = totalRevenu - chargesTotal;
+
+  // Past month spending summary
+  const pastExpenses = state.expenses.flat();
+  const byCat = {};
+  pastExpenses.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+  const pastSummary = Object.entries(byCat).map(([cat, amt]) => cat + ': ' + amt.toFixed(2) + ' EUR').join(', ');
+
+  // Goals summary
+  const goalsSummary = (state.savingsGoals||[]).map(g => {
+    const remaining = g.target - g.current;
+    const now = new Date();
+    const [dy,dm] = g.deadline.split('-').map(Number);
+    const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
+    return g.name + ': ' + remaining.toFixed(0) + ' EUR restants, deadline ' + g.deadline + ', ' + monthsLeft + ' mois restants';
+  }).join('; ');
+
+  // History summary
+  const histSummary = (state.history||[]).slice(0,3).map(h => {
+    const spent = h.weeks.reduce((s,w) => s + (w.expenses||[]).reduce((s2,e) => s2+e.amount, 0), 0);
+    return h.period + ': budget ' + h.monthlyBudget + ', depense ' + spent.toFixed(0);
+  }).join('; ');
+
+  const chargesDetail = (state.chargesFixes||[]).map(c => c.label + ': ' + c.amount.toFixed(2)).join(', ');
+  const weekNames = state.weeks.map(w => w.name).join(', ');
+  const categories = CAT_LIST.join(', ');
+
+  const prompt = `Tu es un assistant budget personnel. Génère un budget mensuel.
+
+REVENUS: ${totalRevenu.toFixed(2)} EUR (salaire: ${salary}, extra: ${extra})
+CHARGES FIXES: ${chargesTotal.toFixed(2)} EUR (${chargesDetail})
+DISPONIBLE POUR VIVRE: ${dispo.toFixed(2)} EUR
+ÉPARGNE ACTUELLE: ${(state.savings||0).toFixed(2)} EUR
+OBJECTIFS ÉPARGNE: ${goalsSummary || 'aucun'}
+DÉPENSES MOIS PRÉCÉDENT: ${pastSummary || 'pas de données'}
+HISTORIQUE: ${histSummary || 'pas de données'}
+SEMAINES DU MOIS: ${weekNames}
+CATÉGORIES: ${categories}
+${notes ? 'NOTES: ' + notes : ''}
+
+Réponds UNIQUEMENT en JSON valide, sans aucun texte avant ou après, avec cette structure exacte:
+{
+  "monthlyBudget": nombre,
+  "epargneConseillee": nombre,
+  "commentaire": "texte court expliquant les choix",
+  "weeks": [
+    {
+      "name": "nom semaine",
+      "budget": nombre,
+      "plan": [
+        { "cat": "catégorie exacte de la liste", "label": "description", "amount": nombre }
+      ]
+    }
+  ]
+}
+
+Règles:
+- monthlyBudget = ce qui reste après charges fixes et épargne conseillée
+- Répartis le budget en 4 semaines réalistes basées sur les habitudes passées
+- Utilise UNIQUEMENT ces catégories: ${categories}
+- Le commentaire doit être en français, 2-3 phrases max
+- Si objectifs épargne, calcule combien mettre de côté ce mois
+- Tiens compte des notes de la personne`;
+
+  // Show loading
+  document.getElementById('gen-loading').classList.add('show');
+  document.getElementById('gen-result').style.display = 'none';
+  document.getElementById('gen-apply-btn').style.display = 'none';
+
+  try {
+    const response = await fetch('/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+    });
+
+    const data = await response.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/\`\`\`json|\`\`\`/g, '').trim();
+    generatedPlan = JSON.parse(clean);
+
+    // Display result
+    let html = '<div style="margin-bottom:12px;font-size:14px;">' + generatedPlan.commentaire + '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">';
+    html += '<div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;opacity:0.7;">Budget vie courante</div><div style="font-size:20px;font-weight:600;">' + fmt(generatedPlan.monthlyBudget) + '</div></div>';
+    html += '<div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:11px;opacity:0.7;">Épargne conseillée</div><div style="font-size:20px;font-weight:600;">' + fmt(generatedPlan.epargneConseillee) + '</div></div>';
+    html += '</div>';
+
+    generatedPlan.weeks.forEach(w => {
+      html += '<div style="border-top:1px solid rgba(255,255,255,0.2);padding:10px 0;">';
+      html += '<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><strong>' + w.name + '</strong><span>' + fmt(w.budget) + '</span></div>';
+      w.plan.forEach(p => {
+        html += '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.8;padding:2px 0;"><span>' + (CAT_ICONS[p.cat]||'') + ' ' + p.label + '</span><span>' + fmt(p.amount) + '</span></div>';
+      });
+      html += '</div>';
+    });
+
+    document.getElementById('gen-result-content').innerHTML = html;
+    document.getElementById('gen-result').style.display = 'block';
+    document.getElementById('gen-apply-btn').style.display = 'block';
+
+  } catch(err) {
+    alert('Erreur : ' + err.message);
+  } finally {
+    document.getElementById('gen-loading').classList.remove('show');
+  }
+}
+
+function applyGeneratedBudget() {
+  if (!generatedPlan) return;
+  if (!confirm('Appliquer ce budget ? Cela va remplacer le budget et le plan actuels.')) return;
+
+  state.monthlyBudget = generatedPlan.monthlyBudget;
+  generatedPlan.weeks.forEach((w, i) => {
+    if (state.weeks[i]) {
+      state.weeks[i].name = w.name;
+      state.weeks[i].budget = w.budget;
+    }
+    state.plan[i] = w.plan.map(p => ({ cat: p.cat, label: p.label, amount: p.amount }));
+  });
+
+  save();
+  renderMonthly();
+  renderWeekly();
+  alert('✅ Budget appliqué ! Allez dans Semaine pour voir le résultat.');
+}
+
 // ── BILAN ─────────────────────────────────────────
 function renderBilan() {
   let totalEpargne = 0;
@@ -955,6 +1340,27 @@ function renderBilan() {
     epargneTotalEl.style.background = 'linear-gradient(135deg,#6B6560,#888780)';
     document.getElementById('bilan-epargne-title-text').textContent = '📊 Budget parfaitement utilisé';
     detailEl.innerHTML = 'Ni reste ni dépassement ce mois';
+  }
+
+  // RENDER GOALS IN BILAN
+  const goalsEl = document.getElementById('bilan-goals');
+  if ((state.savingsGoals||[]).length > 0) {
+    goalsEl.innerHTML = state.savingsGoals.map(g => {
+      const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+      const remaining = g.target - g.current;
+      const now = new Date();
+      const [dy,dm] = g.deadline.split('-').map(Number);
+      const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + (dm - now.getMonth() - 1));
+      const perMonth = remaining > 0 ? Math.ceil(remaining / monthsLeft) : 0;
+      return '<div class="goal-card">' +
+        '<div class="goal-header"><span class="goal-name">' + g.name + '</span><span class="goal-deadline">' + g.deadline + '</span></div>' +
+        '<div class="goal-amounts"><span>' + fmt(g.current) + ' / ' + fmt(g.target) + '</span><span>' + pct + '%</span></div>' +
+        '<div class="goal-bar-wrap"><div class="goal-bar" style="width:' + pct + '%;"></div></div>' +
+        (perMonth > 0 ? '<div class="goal-remaining">→ ' + fmt(perMonth) + '/mois pendant ' + monthsLeft + ' mois</div>' : '<div class="goal-remaining" style="color:var(--green);">✅ Objectif atteint !</div>') +
+      '</div>';
+    }).join('');
+  } else {
+    goalsEl.innerHTML = '<div style="color:var(--text3);font-size:13px;">Aucun objectif — ajoutez-en dans 🤖 Assistant</div>';
   }
 
   // RENDER CHARTS with delay
