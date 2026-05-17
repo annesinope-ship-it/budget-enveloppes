@@ -514,6 +514,33 @@
 
 </div>
 
+<!-- GOAL EDIT MODAL -->
+<div class="edit-modal" id="goal-edit-modal">
+  <div class="edit-modal-box">
+    <div class="edit-modal-title">Modifier l'objectif</div>
+    <div class="edit-field">
+      <label>Nom</label>
+      <input type="text" id="goal-edit-name" />
+    </div>
+    <div class="edit-field">
+      <label>Montant cible (€)</label>
+      <input type="number" id="goal-edit-target" min="0" step="100" />
+    </div>
+    <div class="edit-field">
+      <label>Déjà épargné (€)</label>
+      <input type="number" id="goal-edit-current" min="0" step="100" />
+    </div>
+    <div class="edit-field">
+      <label>Échéance</label>
+      <input type="month" id="goal-edit-deadline" />
+    </div>
+    <div class="edit-btns">
+      <button class="edit-cancel" onclick="closeGoalModal()">Annuler</button>
+      <button class="edit-save" onclick="saveGoalEdit()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- REMINDER BANNER -->
 <div class="reminder-banner" id="reminder-banner">
   <div class="reminder-title" id="reminder-title">💰 Rappel épargne</div>
@@ -1158,24 +1185,42 @@ function addGoal() {
   save();
 }
 
+let editingGoalIdx = null;
+
 function editGoal(i) {
   const g = state.savingsGoals[i];
   if (!g) return;
-  const name = prompt('Nom de l\'objectif :', g.name);
-  if (name === null) return;
-  const target = prompt('Montant cible (€) :', g.target);
-  if (target === null) return;
-  const current = prompt('Montant déjà épargné (€) :', g.current);
-  if (current === null) return;
-  const deadline = prompt('Échéance (format AAAA-MM) :', g.deadline);
-  if (deadline === null) return;
-  g.name = name;
-  g.target = parseFloat(target) || g.target;
-  g.current = parseFloat(current) || g.current;
-  g.deadline = deadline || g.deadline;
+  editingGoalIdx = i;
+  document.getElementById('goal-edit-name').value = g.name;
+  document.getElementById('goal-edit-target').value = g.target;
+  document.getElementById('goal-edit-current').value = g.current;
+  document.getElementById('goal-edit-deadline').value = g.deadline;
+  document.getElementById('goal-edit-modal').classList.add('open');
+}
+
+function closeGoalModal() {
+  document.getElementById('goal-edit-modal').classList.remove('open');
+  editingGoalIdx = null;
+}
+
+function saveGoalEdit() {
+  if (editingGoalIdx === null) return;
+  const g = state.savingsGoals[editingGoalIdx];
+  if (!g) return;
+  g.name = document.getElementById('goal-edit-name').value.trim() || g.name;
+  g.target = parseFloat(document.getElementById('goal-edit-target').value) || g.target;
+  g.current = parseFloat(document.getElementById('goal-edit-current').value) || 0;
+  g.deadline = document.getElementById('goal-edit-deadline').value || g.deadline;
+  closeGoalModal();
   save();
   renderGenerator();
+  renderSettings();
 }
+
+// Close goal modal on overlay click
+document.getElementById('goal-edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeGoalModal();
+});
 
 function removeGoal(i) {
   state.savingsGoals.splice(i, 1);
