@@ -246,11 +246,11 @@
             <option value="Alimentation">🛒 Alimentation</option>
             <option value="Restaurants & cafés">🍽️ Restaurants & cafés</option>
             <option value="Uber Eats">🛵 Uber Eats</option>
-            <option value="Mode & vêtements">👗 Mode & vêtements</option>
+            <option value="Shopping">🛍️ Shopping</option>
+            <option value="Beauté & soin">💅 Beauté & soin</option>
             <option value="Transport">🚇 Transport</option>
             <option value="Sport">💪 Sport</option>
             <option value="Sorties & loisirs">🎉 Sorties & loisirs</option>
-            <option value="Cadeaux & virements">🎁 Cadeaux & virements</option>
             <option value="Imprévus">⚡ Imprévus</option>
           </select>
           </div>
@@ -376,11 +376,11 @@
         <option value="Alimentation">🛒 Alimentation</option>
         <option value="Restaurants & cafés">🍽️ Restaurants & cafés</option>
         <option value="Uber Eats">🛵 Uber Eats</option>
-        <option value="Mode & vêtements">👗 Mode & vêtements</option>
+        <option value="Shopping">🛍️ Shopping</option>
+        <option value="Beauté & soin">💅 Beauté & soin</option>
         <option value="Transport">🚇 Transport</option>
         <option value="Sport">💪 Sport</option>
         <option value="Sorties & loisirs">🎉 Sorties & loisirs</option>
-        <option value="Cadeaux & virements">🎁 Cadeaux & virements</option>
         <option value="Imprévus">⚡ Imprévus</option>
       </select>
     </div>
@@ -398,8 +398,8 @@
 <script>
 const CAT_COLORS = {
   'Alimentation':'#C2621A','Restaurants & cafés':'#9B4DCA','Uber Eats':'#E24B4A',
-  'Mode & vêtements':'#D4537E','Transport':'#1D7A5F','Sport':'#185FA5',
-  'Sorties & loisirs':'#7F77DD','Cadeaux & virements':'#888780','Imprévus':'#555555'
+  'Shopping':'#D4537E','Beauté & soin':'#E8A0B0','Transport':'#1D7A5F',
+  'Sport':'#185FA5','Sorties & loisirs':'#7F77DD','Imprévus':'#555555'
 };
 
 let state = {
@@ -427,7 +427,7 @@ let state = {
       { cat: 'Alimentation', label: 'Courses', amount: 50 },
       { cat: 'Restaurants & cafés', label: 'Restaurants & cafés', amount: 40 },
       { cat: 'Uber Eats', label: 'Uber Eats', amount: 20 },
-      { cat: 'Mode & vêtements', label: 'Mode & vêtements', amount: 100 },
+      { cat: 'Shopping', label: 'Shopping', amount: 100 },
       { cat: 'Transport', label: 'Transport (Uber Trip)', amount: 15 },
       { cat: 'Sorties & loisirs', label: 'Sorties & loisirs', amount: 50 },
       { cat: 'Imprévus', label: 'Divers', amount: 30 }
@@ -436,7 +436,7 @@ let state = {
       { cat: 'Alimentation', label: 'Courses', amount: 50 },
       { cat: 'Restaurants & cafés', label: 'Restaurants & cafés', amount: 40 },
       { cat: 'Uber Eats', label: 'Uber Eats', amount: 20 },
-      { cat: 'Mode & vêtements', label: 'Mode & vêtements', amount: 100 },
+      { cat: 'Shopping', label: 'Shopping', amount: 100 },
       { cat: 'Transport', label: 'Transport (Uber Trip)', amount: 15 },
       { cat: 'Sorties & loisirs', label: 'Sorties & loisirs', amount: 50 },
       { cat: 'Imprévus', label: 'Divers', amount: 30 }
@@ -601,10 +601,10 @@ function resetMonth() {
 // ── PLAN ──────────────────────────────────────────
 const CAT_ICONS = {
   'Alimentation':'🛒','Restaurants & cafés':'🍽️','Uber Eats':'🛵',
-  'Mode & vêtements':'👗','Transport':'🚇','Sport':'💪',
-  'Sorties & loisirs':'🎉','Cadeaux & virements':'🎁','Imprévus':'⚡'
+  'Shopping':'🛍️','Beauté & soin':'💅','Transport':'🚇',
+  'Sport':'💪','Sorties & loisirs':'🎉','Imprévus':'⚡'
 };
-const CAT_LIST = ['Alimentation','Restaurants & cafés','Uber Eats','Mode & vêtements','Transport','Sport','Sorties & loisirs','Cadeaux & virements','Imprévus'];
+const CAT_LIST = ['Alimentation','Restaurants & cafés','Uber Eats','Shopping','Beauté & soin','Transport','Sport','Sorties & loisirs','Imprévus'];
 
 function renderPlan() {
   const el = document.getElementById('plan-content');
@@ -878,7 +878,7 @@ function renderAnalysis() {
   }
 
   // Build cat totals per month
-  const CAT_COLORS_ANALYSIS = {'Alimentation':'#C2621A','Restaurants & cafés':'#9B4DCA','Uber Eats':'#E24B4A','Mode & vêtements':'#D4537E','Transport':'#1D7A5F','Sport':'#185FA5','Sorties & loisirs':'#7F77DD','Cadeaux & virements':'#888780','Imprévus':'#555555'};
+  const CAT_COLORS_ANALYSIS = {'Alimentation':'#C2621A','Restaurants & cafés':'#9B4DCA','Uber Eats':'#E24B4A','Shopping':'#D4537E','Beauté & soin':'#E8A0B0','Transport':'#1D7A5F','Sport':'#185FA5','Sorties & loisirs':'#7F77DD','Imprévus':'#555555'};
   const labels = allMonths.map(m => m.period.split('→')[1]?.trim().substring(3) || m.period.substring(0,10));
   const totals = allMonths.map(m => m.weeks.reduce((s,w)=>s+(w.expenses||[]).reduce((s2,e)=>s2+e.amount,0),0));
   const budgets = allMonths.map(m => m.monthlyBudget);
